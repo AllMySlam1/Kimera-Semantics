@@ -18,14 +18,15 @@
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 
 /**
@@ -39,30 +40,30 @@
 
 #include <voxblox_ros/tsdf_server.h>
 
-#include "kimera_semantics/semantic_voxel.h"
 #include "kimera_semantics/semantic_integrator_base.h"
+#include "kimera_semantics/semantic_voxel.h"
 
 namespace kimera {
 
 class SemanticTsdfServer : public vxb::TsdfServer {
- public:
-  SemanticTsdfServer(const ros::NodeHandle& nh,
-                     const ros::NodeHandle& nh_private);
+  public:
+    SemanticTsdfServer(const ros::NodeHandle& nh,
+                       const ros::NodeHandle& nh_private);
 
-  SemanticTsdfServer(const ros::NodeHandle& nh,
-                     const ros::NodeHandle& nh_private,
-                     const vxb::TsdfMap::Config& config,
-                     const vxb::TsdfIntegratorBase::Config& integrator_config,
-                     const vxb::MeshIntegratorConfig& mesh_config);
+    SemanticTsdfServer(const ros::NodeHandle&                 nh,
+                       const ros::NodeHandle&                 nh_private,
+                       const vxb::TsdfMap::Config&            config,
+                       const vxb::TsdfIntegratorBase::Config& integrator_config,
+                       const vxb::MeshIntegratorConfig&       mesh_config);
 
-  virtual ~SemanticTsdfServer() = default;
+    virtual ~SemanticTsdfServer() = default;
 
- protected:
-  // Configs.
-  SemanticIntegratorBase::SemanticConfig semantic_config_;
+  protected:
+    // Configs.
+    SemanticIntegratorBase::SemanticConfig semantic_config_;
 
-  // Layers.
-  std::unique_ptr<vxb::Layer<SemanticVoxel>> semantic_layer_;
+    // Layers.
+    std::unique_ptr<vxb::Layer<SemanticVoxel>> semantic_layer_;
 };
 
 }  // Namespace kimera

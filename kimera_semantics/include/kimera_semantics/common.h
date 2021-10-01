@@ -14,7 +14,7 @@ namespace kimera {
 
 namespace vxb = voxblox;
 
-typedef uint8_t SemanticLabel;
+typedef uint8_t                           SemanticLabel;
 typedef vxb::AlignedVector<SemanticLabel> SemanticLabels;
 // Consider id 0 to be the `unknown' label, for which we don't update the
 // log-likelihood for that measurement.
@@ -23,7 +23,7 @@ static constexpr uint8_t kUnknownSemanticLabelId = 0u;
 // supports.
 // TODO(Toni): parametrize this, although that means it becomes unknown at
 // compile time...
-static constexpr size_t kTotalNumberOfLabels = 21;
+static constexpr size_t    kTotalNumberOfLabels = 21;
 typedef vxb::FloatingPoint SemanticProbability;
 typedef Eigen::Matrix<SemanticProbability, kTotalNumberOfLabels, 1>
     SemanticProbabilities;
@@ -39,9 +39,9 @@ typedef VoxelMap::value_type VoxelMapElement;
 
 // Add compatibility for c++11's lack of make_unique.
 template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
-
 
 }  // namespace kimera

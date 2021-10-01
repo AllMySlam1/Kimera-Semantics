@@ -18,14 +18,15 @@
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 
 /**
@@ -52,30 +53,29 @@ SemanticTsdfServer::SemanticTsdfServer(const ros::NodeHandle& nh,
                          nh_private,
                          vxb::getTsdfMapConfigFromRosParam(nh_private),
                          vxb::getTsdfIntegratorConfigFromRosParam(nh_private),
-                         vxb::getMeshIntegratorConfigFromRosParam(nh_private)) {
+                         vxb::getMeshIntegratorConfigFromRosParam(nh_private))
+{
 }
 
 SemanticTsdfServer::SemanticTsdfServer(
-    const ros::NodeHandle& nh,
-    const ros::NodeHandle& nh_private,
-    const vxb::TsdfMap::Config& config,
+    const ros::NodeHandle&                 nh,
+    const ros::NodeHandle&                 nh_private,
+    const vxb::TsdfMap::Config&            config,
     const vxb::TsdfIntegratorBase::Config& integrator_config,
-    const vxb::MeshIntegratorConfig& mesh_config)
+    const vxb::MeshIntegratorConfig&       mesh_config)
     : vxb::TsdfServer(nh, nh_private, config, integrator_config, mesh_config),
       semantic_config_(getSemanticTsdfIntegratorConfigFromRosParam(nh_private)),
-      semantic_layer_(nullptr) {
-  /// Semantic layer
-  semantic_layer_.reset(new vxb::Layer<SemanticVoxel>(
-      config.tsdf_voxel_size, config.tsdf_voxels_per_side));
-  /// Replace the TSDF integrator by the SemanticTsdfIntegrator
-  tsdf_integrator_ =
-      SemanticTsdfIntegratorFactory::create(
+      semantic_layer_(nullptr)
+{
+    /// Semantic layer
+    semantic_layer_.reset(new vxb::Layer<SemanticVoxel>(
+        config.tsdf_voxel_size, config.tsdf_voxels_per_side));
+    /// Replace the TSDF integrator by the SemanticTsdfIntegrator
+    tsdf_integrator_ = SemanticTsdfIntegratorFactory::create(
         getSemanticTsdfIntegratorTypeFromRosParam(nh_private),
-        integrator_config,
-        semantic_config_,
-        tsdf_map_->getTsdfLayerPtr(),
+        integrator_config, semantic_config_, tsdf_map_->getTsdfLayerPtr(),
         semantic_layer_.get());
-  CHECK(tsdf_integrator_);
+    CHECK(tsdf_integrator_);
 }
 
 }  // Namespace kimera

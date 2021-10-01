@@ -17,11 +17,11 @@
 
 namespace kimera {
 
-std::string getSemanticTsdfIntegratorTypeFromRosParam(
-    const ros::NodeHandle& nh_private);
+std::string
+getSemanticTsdfIntegratorTypeFromRosParam(const ros::NodeHandle& nh_private);
 
-std::string getSemanticLabelToColorCsvFilepathFromRosParam(
-    const ros::NodeHandle& nh);
+std::string
+getSemanticLabelToColorCsvFilepathFromRosParam(const ros::NodeHandle& nh);
 
 SemanticIntegratorBase::SemanticConfig
 getSemanticTsdfIntegratorConfigFromRosParam(const ros::NodeHandle& nh_private);

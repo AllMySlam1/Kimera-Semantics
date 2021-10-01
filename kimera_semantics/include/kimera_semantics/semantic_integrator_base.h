@@ -52,177 +52,183 @@
 namespace kimera {
 
 enum class ColorMode : int {
-  kColor = 0,
-  kSemantic = 1,
-  kSemanticProbability = 2,
+    kColor               = 0,
+    kSemantic            = 1,
+    kSemanticProbability = 2,
 };
 
 class SemanticIntegratorBase {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  typedef std::shared_ptr<SemanticIntegratorBase> Ptr;
-  typedef vxb::
-      ApproxHashArray<12, std::mutex, vxb::GlobalIndex, vxb::LongIndexHash>
-          Mutexes;
-
-  struct SemanticConfig {
+  public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef std::shared_ptr<SemanticIntegratorBase> Ptr;
+    typedef vxb::
+        ApproxHashArray<12, std::mutex, vxb::GlobalIndex, vxb::LongIndexHash>
+            Mutexes;
 
-    // Likelihood probability of observing a measurement given that the prior
-    // semantic label is the same as the measurement.
-    // This number has to be a valid probability between 0 and 1.
-    // Our current model derives the likelihood of observing a semantic label
-    // for a voxel with a currently different label match as:
-    // probability of non-match = 1 - measurement_probability_.
-    SemanticProbability semantic_measurement_probability_ = 0.9f;
+    struct SemanticConfig
+    {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    /// How to color the semantic mesh.
-    ColorMode color_mode = ColorMode::kSemantic;
+        // Likelihood probability of observing a measurement given that the
+        // prior semantic label is the same as the measurement. This number has
+        // to be a valid probability between 0 and 1. Our current model derives
+        // the likelihood of observing a semantic label for a voxel with a
+        // currently different label match as: probability of non-match = 1 -
+        // measurement_probability_.
+        SemanticProbability semantic_measurement_probability_ = 0.9f;
 
-    std::shared_ptr<SemanticLabel2Color> semantic_label_to_color_ = nullptr;
+        /// How to color the semantic mesh.
+        ColorMode color_mode = ColorMode::kSemantic;
 
-    /// Semantic labels for dynamic objects that are not supposed to be
-    /// integrated in the voxel grid.
-    SemanticLabels dynamic_labels_ = SemanticLabels();
-  };
+        std::shared_ptr<SemanticLabel2Color> semantic_label_to_color_ = nullptr;
 
-  SemanticIntegratorBase(const SemanticConfig& semantic_config,
-                         vxb::Layer<SemanticVoxel>* semantic_layer);
+        /// Semantic labels for dynamic objects that are not supposed to be
+        /// integrated in the voxel grid.
+        SemanticLabels dynamic_labels_ = SemanticLabels();
+    };
 
-  // TODO(Toni): Complete this function!!
-  SemanticProbability computeMeasurementProbability(
-      vxb::FloatingPoint ray_distance);
+    SemanticIntegratorBase(const SemanticConfig&      semantic_config,
+                           vxb::Layer<SemanticVoxel>* semantic_layer);
 
-  // SHOULD BE THREAD SAFE. Updates semantic_voxel probabilities given
-  // semantic_label measurement and confidence.
+    // TODO(Toni): Complete this function!!
+    SemanticProbability
+    computeMeasurementProbability(vxb::FloatingPoint ray_distance);
 
-  /**
-   * @brief updateSemanticVoxel
-   * Probabilistically updates semantic voxels according to a measurement model.
-   * TODO(Toni): parametrize the measurement model.
-   *
-   * @param global_voxel_idx
-   * @param measurement_frequencies
-   * @param mutexes: we pass the list of mutexes bcs it would be too wasteful to
-   * have to lock two mutexes (one for the tsdf_voxel, another for the
-   * semantic_voxel, instead we expect the user to send the mutexes for
-   * tsdf_voxels, and we will always lock them when updating semantic_voxels.
-   * @param tsdf_voxel
-   * @param semantic_voxel
-   */
-  void updateSemanticVoxel(const vxb::GlobalIndex& global_voxel_idx,
-                           const SemanticProbabilities& measurement_frequencies,
-                           Mutexes* mutexes,
-                           vxb::TsdfVoxel* tsdf_voxel,
-                           SemanticVoxel* semantic_voxel);
+    // SHOULD BE THREAD SAFE. Updates semantic_voxel probabilities given
+    // semantic_label measurement and confidence.
 
-  // Will return a pointer to a voxel located at global_voxel_idx in the label
-  // layer. Thread safe.
-  // Takes in the last_block_idx and last_block to prevent unneeded map
-  // lookups. If the block this voxel would be in has not been allocated, a
-  // block in temp_label_block_map_ is created/accessed and a voxel from this
-  // map is returned instead. Unlike the layer, accessing
-  // temp_label_block_map_ is controlled via a mutex allowing it to grow
-  // during integration. These temporary blocks can be merged into the layer
-  // later by calling updateLayerWithStoredBlocks()
-  SemanticVoxel* allocateStorageAndGetSemanticVoxelPtr(
-      const vxb::GlobalIndex& global_voxel_idx,
-      vxb::Block<SemanticVoxel>::Ptr* last_semantic_block,
-      vxb::BlockIndex* last_block_idx);
+    /**
+     * @brief updateSemanticVoxel
+     * Probabilistically updates semantic voxels according to a measurement
+     * model.
+     * TODO(Toni): parametrize the measurement model.
+     *
+     * @param global_voxel_idx
+     * @param measurement_frequencies
+     * @param mutexes: we pass the list of mutexes bcs it would be too wasteful
+     * to have to lock two mutexes (one for the tsdf_voxel, another for the
+     * semantic_voxel, instead we expect the user to send the mutexes for
+     * tsdf_voxels, and we will always lock them when updating semantic_voxels.
+     * @param tsdf_voxel
+     * @param semantic_voxel
+     */
+    void
+    updateSemanticVoxel(const vxb::GlobalIndex&      global_voxel_idx,
+                        const SemanticProbabilities& measurement_frequencies,
+                        Mutexes*                     mutexes,
+                        vxb::TsdfVoxel*              tsdf_voxel,
+                        SemanticVoxel*               semantic_voxel);
 
-  // NOT THREAD SAFE
-  void updateSemanticLayerWithStoredBlocks();
+    // Will return a pointer to a voxel located at global_voxel_idx in the label
+    // layer. Thread safe.
+    // Takes in the last_block_idx and last_block to prevent unneeded map
+    // lookups. If the block this voxel would be in has not been allocated, a
+    // block in temp_label_block_map_ is created/accessed and a voxel from this
+    // map is returned instead. Unlike the layer, accessing
+    // temp_label_block_map_ is controlled via a mutex allowing it to grow
+    // during integration. These temporary blocks can be merged into the layer
+    // later by calling updateLayerWithStoredBlocks()
+    SemanticVoxel* allocateStorageAndGetSemanticVoxelPtr(
+        const vxb::GlobalIndex&         global_voxel_idx,
+        vxb::Block<SemanticVoxel>::Ptr* last_semantic_block,
+        vxb::BlockIndex*                last_block_idx);
 
-  /** THREAD SAFE
-   * Given a measured semantic label (semantic_label),
-   * a measurement probability (measurement_probability), and
-   * the set of prior semantic probabilities (semantic_prior_probability).
-   * Returns: __normalized__ posterior probabilities given by the update eq.:
-   *
-   * posterior_i = measurement_probability * prior_i; // Iff i == measured_label
-   * posterior_i = (1 - measurement_probability) * prior_i; // i !=
-   *mesured_label
-   *
-   * Typically, one would set measurement_probability to be 0.9
-   * Unless prior knowledge of the likelihood of the measurement is given.
-   * For example, one may encode higher probability of measuring label floor
-   * if voxel is close to ground.
-   **/
-  // TODO(Toni): Unit Test this function!
-  void updateSemanticVoxelProbabilities(
-      const SemanticProbabilities& measurement_frequencies,
-      SemanticProbabilities* semantic_prior_probability) const;
+    // NOT THREAD SAFE
+    void updateSemanticLayerWithStoredBlocks();
 
-  // THREAD SAFE
-  void normalizeProbabilities(SemanticProbabilities* unnormalized_probs) const;
+    /** THREAD SAFE
+     * Given a measured semantic label (semantic_label),
+     * a measurement probability (measurement_probability), and
+     * the set of prior semantic probabilities (semantic_prior_probability).
+     * Returns: __normalized__ posterior probabilities given by the update eq.:
+     *
+     * posterior_i = measurement_probability * prior_i; // Iff i ==
+     *measured_label posterior_i = (1 - measurement_probability) * prior_i; // i
+     *!= mesured_label
+     *
+     * Typically, one would set measurement_probability to be 0.9
+     * Unless prior knowledge of the likelihood of the measurement is given.
+     * For example, one may encode higher probability of measuring label floor
+     * if voxel is close to ground.
+     **/
+    // TODO(Toni): Unit Test this function!
+    void updateSemanticVoxelProbabilities(
+        const SemanticProbabilities& measurement_frequencies,
+        SemanticProbabilities*       semantic_prior_probability) const;
 
-  // THREAD SAFE
-  inline void calculateMaximumLikelihoodLabel(
-      const SemanticProbabilities& semantic_posterior,
-      SemanticLabel* semantic_label) const;
+    // THREAD SAFE
+    void
+    normalizeProbabilities(SemanticProbabilities* unnormalized_probs) const;
 
-  // THREAD SAFE
-  void updateSemanticVoxelColor(const SemanticLabel& semantic_label,
-                                HashableColor* semantic_voxel_color) const;
+    // THREAD SAFE
+    inline void calculateMaximumLikelihoodLabel(
+        const SemanticProbabilities& semantic_posterior,
+        SemanticLabel*               semantic_label) const;
 
- protected:
-  /// Thread safe.
-  inline bool isSemanticLabelValid(const SemanticLabel& semantic_label) const {
-    // We discard any point in the dynamic semantic labels.
-    return std::find(semantic_config_.dynamic_labels_.begin(),
-                     semantic_config_.dynamic_labels_.end(),
-                     semantic_label) == semantic_config_.dynamic_labels_.end();
-  }
+    // THREAD SAFE
+    void updateSemanticVoxelColor(const SemanticLabel& semantic_label,
+                                  HashableColor* semantic_voxel_color) const;
 
- private:
-  /**
-   * @brief setSemanticLayer
-   * Helper function to store members of the class related to the semantic layer
-   * as well as the semantic layer itself from the provided pointer.
-   * @param semantic_layer pointer to an already created semantic_layer
-   */
-  void setSemanticLayer(vxb::Layer<SemanticVoxel>* semantic_layer);
+  protected:
+    /// Thread safe.
+    inline bool isSemanticLabelValid(const SemanticLabel& semantic_label) const
+    {
+        // We discard any point in the dynamic semantic labels.
+        return std::find(semantic_config_.dynamic_labels_.begin(),
+                         semantic_config_.dynamic_labels_.end(),
+                         semantic_label) ==
+               semantic_config_.dynamic_labels_.end();
+    }
 
-  /**
-   * @brief setSemanticProbabilities
-   * Helper function to set and store the measurement likelihood function.
-   */
-  void setSemanticProbabilities();
+  private:
+    /**
+     * @brief setSemanticLayer
+     * Helper function to store members of the class related to the semantic
+     * layer as well as the semantic layer itself from the provided pointer.
+     * @param semantic_layer pointer to an already created semantic_layer
+     */
+    void setSemanticLayer(vxb::Layer<SemanticVoxel>* semantic_layer);
 
- public:
-  /// Configuration
-  const SemanticConfig semantic_config_;
+    /**
+     * @brief setSemanticProbabilities
+     * Helper function to set and store the measurement likelihood function.
+     */
+    void setSemanticProbabilities();
 
-  /// Layer with semantic information.
-  vxb::Layer<SemanticVoxel>* semantic_layer_;
+  public:
+    /// Configuration
+    const SemanticConfig semantic_config_;
 
-  /**
-   * Temporary block storage, used to hold blocks that need to be created while
-   * integrating a new pointcloud
-   */
-  mutable std::mutex temp_semantic_block_mutex_;
-  vxb::Layer<SemanticVoxel>::BlockHashMap temp_semantic_block_map_;
+    /// Layer with semantic information.
+    vxb::Layer<SemanticVoxel>* semantic_layer_;
 
-  // Log probabilities of matching measurement and prior label,
-  // and non-matching.
-  SemanticProbability log_match_probability_;
-  SemanticProbability log_non_match_probability_;
-  // A `#Labels X #Labels` Eigen matrix where each `j` column represents the
-  // probability of observing label `j` when current label is `i`, where `i`
-  // is the row index of the matrix.
-  SemanticLikelihoodFunction semantic_log_likelihood_;
+    /**
+     * Temporary block storage, used to hold blocks that need to be created
+     * while integrating a new pointcloud
+     */
+    mutable std::mutex                      temp_semantic_block_mutex_;
+    vxb::Layer<SemanticVoxel>::BlockHashMap temp_semantic_block_map_;
 
-  /// We keep these in case someone wants to experiment with different
-  /// semantic/tsdf voxel sizes.
-  // Cached map config.
-  vxb::FloatingPoint semantic_voxel_size_;
-  size_t semantic_voxels_per_side_;
-  vxb::FloatingPoint semantic_block_size_;
+    // Log probabilities of matching measurement and prior label,
+    // and non-matching.
+    SemanticProbability log_match_probability_;
+    SemanticProbability log_non_match_probability_;
+    // A `#Labels X #Labels` Eigen matrix where each `j` column represents the
+    // probability of observing label `j` when current label is `i`, where `i`
+    // is the row index of the matrix.
+    SemanticLikelihoodFunction semantic_log_likelihood_;
 
-  // Derived types.
-  vxb::FloatingPoint semantic_voxel_size_inv_;
-  vxb::FloatingPoint semantic_voxels_per_side_inv_;
-  vxb::FloatingPoint semantic_block_size_inv_;
+    /// We keep these in case someone wants to experiment with different
+    /// semantic/tsdf voxel sizes.
+    // Cached map config.
+    vxb::FloatingPoint semantic_voxel_size_;
+    size_t             semantic_voxels_per_side_;
+    vxb::FloatingPoint semantic_block_size_;
+
+    // Derived types.
+    vxb::FloatingPoint semantic_voxel_size_inv_;
+    vxb::FloatingPoint semantic_voxels_per_side_inv_;
+    vxb::FloatingPoint semantic_block_size_inv_;
 };
 
 }  // Namespace kimera
